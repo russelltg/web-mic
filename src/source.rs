@@ -1,8 +1,7 @@
 use std::{
     io,
-    pin::Pin,
     str,
-    task::{Context, Poll},
+    time::{SystemTime, UNIX_EPOCH},
 };
 use tokio::{io::AsyncWrite, process::Command};
 
@@ -13,7 +12,14 @@ pub struct Source {
 
 impl Source {
     pub async fn new(sample_rate: u32, name: &str) -> io::Result<Source> {
-        let filename = format!("/tmp/{}", rand::random::<u64>());
+        // get a unique filename
+        let filename = format!(
+            "/tmp/web_mic_{}",
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_micros()
+        );
 
         let pulse_fut = Command::new("pactl")
             .arg("load-module")
@@ -45,17 +51,9 @@ impl Source {
                 .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e))?,
         })
     }
-}
 
-impl AsyncWrite for Source {
-    fn poll_write(self: Pin<&mut Self>, cx: &mut Context, buf: &[u8]) -> Poll<io::Result<usize>> {
-        Pin::new(&mut self.get_mut().fifo).poll_write(cx, buf)
-    }
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>> {
-        Pin::new(&mut self.get_mut().fifo).poll_flush(cx)
-    }
-    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context) -> Poll<io::Result<()>> {
-        Pin::new(&mut self.get_mut().fifo).poll_shutdown(cx)
+    pub fn writer(&mut self) -> &mut impl AsyncWrite {
+        &mut self.fifo
     }
 }
 

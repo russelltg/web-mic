@@ -3,13 +3,16 @@ authors = ["Russell Greene <russellgreene8@gmail.com>"]
 edition = "2018"
 name = "web-mic"
 version = "0.1.0"
+license = "Apache"
 
 [dependencies]
 warp = {version = "0.2", features = ["tls"] }
 tokio = {version = "0.2", features = ["macros", "process"] }
 pretty_env_logger = "0.4"
-rand = "0.7"
 log = "0.4"
-ctrlc = "3"
-futures = "0.3"
+ctrlc = "3" # To get proper ctrl+c beahvior (closing the audio device)
+rust-embed = "5" # To embed /static in the binary
+mime_guess = "2" # To get mime types for things in /static
+rcgen = "0.8"  # Generate self-signed certs
+nix = "0.17" # To get local IP address
 

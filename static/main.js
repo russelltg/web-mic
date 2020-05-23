@@ -9,6 +9,7 @@ window.onload = () => {
     const wsPromise = new Promise((resolve, reject) => {
         const ws = new WebSocket(`wss://${window.location.host}/audio`);
         ws.onopen = () => resolve(ws);
+        ws.onclose = () => error.innerText = "Disconnected";
     });
     const mediaPromise = navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
         const ctx = new AudioContext();
